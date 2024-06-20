@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import plotly.express as px
 
 class DecodeMessage():
     def __init__(self, message: str, M_big: np.ndarray, niter=5000):
@@ -60,7 +61,31 @@ class DecodeMessage():
         return [char for char in message]
     
     
+class ClassicalGibbs():
+    def __init__(self, niter=2000):
+        self.GibbsFun(niter)
     
+    def f_cond(self,u):
+        if(u>=0 and u<=1/4):
+            v=np.random.uniform(0,u+1/4,1)
+        elif(u>1/4 and u<=3/4):
+            v=np.random.uniform(u-1/4,u+1/4,1)
+        elif(u>3/4 and u<=1):
+            v=np.random.uniform(u-1/4,1,1)
+        return v
     
-    
-    
+    def GibbsFun(self,niter):
+        x=0
+        y=0
+        x_new=[]
+        y_new=[]
+        
+        for i in range(niter):
+            x_new.append(self.f_cond(y))
+            y_new.append(self.f_cond(x_new))
+            x=x_new.copy()
+            y=y_new.copy()
+        
+        res={"x_new": x_new, "y_new": y_new} 
+        fig=px.scatter(res, x="x_new", y="y_new") 
+        fig.show()
