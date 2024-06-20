@@ -1,0 +1,6 @@
+pandas
+numpy
+plotly
+ipykernel
+pytest
+nbformat
