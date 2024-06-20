@@ -34,7 +34,7 @@ class DecodeMessage():
     def Recover(self, message, subFunction):
         message_enum=[[i for i, alpha in enumerate(self.alphabets) if alpha == j] for j in message]
         message_enum = [item 
-                     for sublist in message_enum 
+                        for sublist in message_enum 
                         for item in sublist]
 
         new_message=[self.alphabets[j] for j in [subFunction[i] for i in message_enum]]
