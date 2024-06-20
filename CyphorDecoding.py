@@ -72,7 +72,7 @@ class ClassicalGibbs():
             v=np.random.uniform(u-1/4,u+1/4,1)
         elif(u>3/4 and u<=1):
             v=np.random.uniform(u-1/4,1,1)
-        return v
+        return v.item()
     
     def GibbsFun(self,niter):
         x=0
@@ -82,9 +82,9 @@ class ClassicalGibbs():
         
         for i in range(niter):
             x_new.append(self.f_cond(y))
-            y_new.append(self.f_cond(x_new))
-            x=x_new.copy()
-            y=y_new.copy()
+            y_new.append(self.f_cond(x_new[i]))
+            x=x_new[i]
+            y=y_new[i]
         
         res={"x_new": x_new, "y_new": y_new} 
         fig=px.scatter(res, x="x_new", y="y_new") 
