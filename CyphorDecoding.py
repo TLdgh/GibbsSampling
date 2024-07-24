@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import plotly.express as px
+import pandas as pd
 
 class DecodeMessage():
     def __init__(self, message: str, M_big: np.ndarray, niter=5000):
@@ -42,23 +43,47 @@ class DecodeMessage():
         return new_message
     
     def GibbsFun(self, niter):
-        SubF_old=np.random.choice(list(range(0,27,1)), 27, replace=False)
-        LogL=self.Loglike(message=self.Recover(self.string_split, subFunction=SubF_old))
+        totalresult=pd.DataFrame({"message":[], "LogL":[]})      
         
-        for iter in range(niter):
-            sigma=np.random.choice(list(range(0,27,1)), 2, replace=False)
-            SubF_new=SubF_old.copy()
-            SubF_new[sigma[0]], SubF_new[sigma[1]] = SubF_new[sigma[1]], SubF_new[sigma[0]]
-            newLogL=self.Loglike(message=self.Recover(self.string_split, subFunction=SubF_new))
-            if(1<=math.exp(newLogL-LogL)):
-                SubF_old=SubF_new.copy()
-                LogL=newLogL
+        for i in range(30):
+            print(f"Attempt {i+1}:")
+            SubF_old=np.random.choice(list(range(0,27,1)), 27, replace=False)
+            LogL=self.Loglike(message=self.Recover(self.string_split, subFunction=SubF_old))
             
-            if(iter%1000==0):
-                print(''.join(self.Recover(self.string_split, subFunction=SubF_old)))
-        
+            for iter in range(niter):
+                sigma=np.random.choice(list(range(0,27,1)), 2, replace=False)
+                SubF_new=SubF_old.copy()
+                SubF_new[sigma[0]], SubF_new[sigma[1]] = SubF_new[sigma[1]], SubF_new[sigma[0]]
+                newLogL=self.Loglike(message=self.Recover(self.string_split, subFunction=SubF_new))
+                
+                if(1<=math.exp(newLogL-LogL) ):
+                    SubF_old=SubF_new.copy()
+                    LogL=newLogL
+                
+                res=pd.DataFrame({"message":[''.join(self.Recover(self.string_split, subFunction=SubF_old))], 
+                                "LogL":[LogL]})
+                
+                totalresult=pd.concat([totalresult, res]).sort_values(by="LogL", ascending=False)
+            
+                if(iter%2000==0):
+                    print(totalresult.iloc[0,0])
+                    
+        print(totalresult.head())
+
     def strsplit(self, message):
         return [char for char in message]
+    
+    def EncodeMessage(message):
+        alph=[a for a in "abcdefghijklmnopqrstuvwxyz "]
+        map=[a for a in "defghijklmnopqrstuvwxyz abc"]
+
+        message_encoded=""
+
+        for letter in message:
+            original_index=alph.index(letter)
+            message_encoded += map[original_index]
+
+        return message_encoded
     
     
 class ClassicalGibbs():
